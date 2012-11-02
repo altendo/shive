@@ -1,5 +1,5 @@
 #!/bin/bash
-# mysql
+# mysql library
 
 function mysql.loadDSN()
 {
@@ -10,14 +10,6 @@ function mysql.loadDSN()
     export _mysqlDSNHost="${DSN[2]}"
     export _mysqlDSNDatabase="${DSN[3]}"
 }
-
-#function mysql.checkInit()
-#{
-#   if [ ( -z "$mySQLUser" ) || ( -z "$mySQLPass" ) || ( -z "$mySQLHost" ) || (-z "$mySQLDatabase" ) ]; then
-#       return 1;
-#   fi
-#   return 0;
-#}
 
 mysql.load()
 {

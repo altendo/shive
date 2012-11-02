@@ -434,22 +434,22 @@ function __msgPrint() {
 
     ## mapping severity -> stderr/severityPrefix/color
     local severityPrefix= color=
-    local -i stderr=0
+    local -i stderr=1
     case ${severity} in
         debug|7)
             severityPrefix="${__PrintPrefixSeverity7:->>> [____DEBUG]}"
             color="1;34" # blue on default
-            let stderr=0
+            let stderr=1
             ;;
         info|6)
             severityPrefix="${__PrintPrefixSeverity6:->>> [_____INFO]}"
             color="1;36" # cyan on default
-            let stderr=0
+            let stderr=1
             ;;
         notice|5)
             severityPrefix="${__PrintPrefixSeverity5:->>> [___NOTICE]}"
             color="1;32" # green on default
-            let stderr=0
+            let stderr=1
             ;;
         warning|4)
             severityPrefix="${__PrintPrefixSeverity4:-!!! [__WARNING]}"
