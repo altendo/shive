@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <title>Shive by pezon</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>Shive</h1>
+        <h2>Bash framework for organizing HIVE projects with easy logging and mailing.</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/pezon/shive/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/pezon/shive/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/pezon/shive" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h1>Shive: Shell HIVE framework</h1>
+
+<p>Shive is a Hadoop/HIVE library framework built on <a href="http://www.bashinator.org/">Bashinator</a> to bring organization, standardized logging, mailing and stack tracing to HIVE projects.  The goal of shive is to write light-weight HIVE jobs with as little boilerplate as possible.  Currently, shive includes utility functions to query HIVE and MySQL.  See examples directory to use shive in a project.</p>
+
+<p>Shive <em>must</em> be executed with BASH.  To initialize and run a shive script, be sure to chmod and execute:</p>
+
+<pre><code>chmod +x project/bin/script.sh
+./project/bin/script.sh
+</code></pre>
+
+<h2>Conventions</h2>
+
+<p>Shive naming conventions are based on <a href="http://www.bashinator.org/docs/bashinator-20090610.pdf">Bashinator</a> conventions.</p>
+
+<ul>
+<li>Functions are named in lowerCamelCase</li>
+<li>Global variables are named in UpperCamelCase</li>
+<li>Local variables are named in lowerCamelCase</li>
+<li>Bashinator functions and global variables begin with a double underscore</li>
+<li>Functions that print their results to stdout are named “printSomething”</li>
+<li>Return codes of functions and exit codes of scripts based on Bashinator:
+
+<ul>
+<li>0, positive check result (for check functions only) or successful task, completion (for all other functions)</li>
+<li>1, negative check result (for check functions only, undefined for others)</li>
+<li>2, error (for any function)</li>
+</ul>
+</li>
+<li>Variables are always initialized (with type where possible) before use</li>
+<li>Functions shouldn't ever terminate the script execution on their own, instead, they should return with an error return code so the calling function can take appropriate action.</li>
+</ul><h2>References</h2>
+
+<ul>
+<li>
+<a href="http://www.bashinator.org/docs/bashinator-20090610.pdf">Bashinator documentation</a> for style guide </li>
+<li><a href="http://hive.apache.org/docs/r0.9.0/language_manual/var_substitution.html">HIVE variable substitution</a></li>
+</ul>
+      </section>
+    </div>
+
+    
+  </body>
+</html>
