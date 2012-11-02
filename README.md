@@ -1,46 +1,16 @@
-Shiver: Shell HIVE framework
+Shive: Shell HIVE framework
 ======
 
-Shiver is a HIVE project organization framework built on [Bashinator](http://www.bashinator.org/) to leverage its logging, mailing and stack trace features.  The goal of Shiver is to write light-weight HIVE jobs with as little boilerplate as possible.
+Shive is a Hadoop/HIVE library framework built on [Bashinator](http://www.bashinator.org/) to bring organization, standardized logging, mailing and stack tracing to HIVE projects.  The goal of shive is to write light-weight HIVE jobs with as little boilerplate as possible.  Currently, shive includes utility functions to query HIVE and MySQL.  See examples directory to use shive in a project.
 
-Executing Shiver jobs
------
-Shiver jobs can be as simple as
+Shive *must* be executed with BASH.  To initialize and run a shive script, be sure to chmod and execute:
 
-    #!/bin/bash
-    . "/path/to/shiver"
-
-    hive.shiver\
-        -e "explain hello_world"
-
-Or as complex as
-
-    #!/bin/bash
-    . "/path/to/shiver"
-
-    include utils
-
-    utils.describe hello_world
-
-with library file utils.inc.
-
-    function utils.describe() {
-        local $tableName=${1}
-        if ! hive.query\
-            -hiveconf tableName=$tableName\
-            -f describe.ql; then
-            return 2;
-        return 0;
-    }
-
-with query file utils/describe.ql
-
-    describe
-        ${hiveconf:tableName};
+    chmod +x project/bin/script.sh
+    ./project/bin/script.sh
 
 Conventions
 -----
-Shiver naming conventions are based on [Bashinator](http://www.bashinator.org/docs/bashinator-20090610.pdf) conventions.
+Shive naming conventions are based on [Bashinator](http://www.bashinator.org/docs/bashinator-20090610.pdf) conventions.
 
 * Functions are named in lowerCamelCase
 * Global variables are named in UpperCamelCase

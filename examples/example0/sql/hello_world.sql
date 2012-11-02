@@ -1,0 +1,2 @@
+describe
+    ${hiveconf:tablename};

@@ -1,0 +1,19 @@
+#!/bin/bash
+# hello world
+
+include hive
+
+hive.query\
+    -e "describe hello_world";
+
+hive.query\
+    -hiveconf tablename='hello_world'\
+    -e "describe ${hiveconf:tablename}";
+
+hive.query\
+    -hiveconf tablename='hello_world'\
+    -f sql/hello_world.sql;
+
+include hello
+
+hello.world 'hello_world'

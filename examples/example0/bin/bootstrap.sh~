@@ -1,0 +1,29 @@
+#!/bin/bash
+# bootstrap and configuration file
+
+export TAGS_DSN='tagshark:t@g5d4t@:172.16.0.44:tags'
+export HIVELIB_PATH='/home/ldap/peter.pezon/hivelib'
+
+export PROJECT_PATH=$(dirname $(readlink -f $0))/..
+export PROJECT_BIN_PATH=$PROJECT_PATH/bin
+export PROJECT_LIB_PATH=$PROJECT_PATH/lib
+export PROJECT_SQL_PATH=$PROJECT_PATH/sql
+
+# init config settings
+export __ScriptLock=0   # create/check lockfile, default=0
+
+# initialize shiver framework
+source $HIVELIB_PATH/shive.sh
+initializeShive
+
+# runtime config settings
+# see hivelib/framework/bashinator/config.inc for more config settings
+export __PrintDebug=1   # print debug messages, default=1
+export __PrintInfo=1    # print info messages, default=1
+export __PrintNotice=1  # print notice messages, default=1
+export __PrintWarning=1 # print warning messages, default=1
+export __PrintErr=1     # print error messages, default=1
+export __PrintCrit=1    # print crit messages, default=1
+export __MailRecipient='peter@grooveshark.com'
+
+
