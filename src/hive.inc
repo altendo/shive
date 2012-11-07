@@ -3,16 +3,23 @@
 
 ##
 # Query HIVE and assign the magical path to a query file, if found
+# Uses kind of an intense and confusing hack to separate stdout and stderr
 function hive.query()
 {
     local args="${@}"
     __msg info "hive args: ${args}"
-    hive\
-        -hiveconf hive.root.logger=ERROR,console\
-        -hiveconf transformPath=$queryPath\
-        "${@}"\
-        3>&1 1>&2 2>&3\
-        | hive.verifyOutput
+    # inside subshell: swap hive's stdout (results) and stderr (messages)
+    # so verifyOutput can read hive messages (reads stdout, outputs stderr);
+    # redirect pipe messages to stdout so hive results and hive messages are separate
+    # outside subshell: swap stdout and stderr again, so stdout=results, stderr=messages
+    {
+        hive\
+            -hiveconf hive.root.logger=ERROR,console\
+            "${@}"\
+            3>&1 1>&2 2>&3\
+            | hive.verifyOutput\
+            2>&1
+    } 3>&1 1>&2 2>&3
     return ${PIPESTATUS[1]};
 }
 
@@ -42,10 +49,4 @@ function hive.verifyOutput()
     else
         return 0;
     fi
-}
-
-
-hive.getLatestPartition()
-{
-    echo $(hive -e "show partitions db_replication_$1" 2> /dev/null | tail -n1 | cut -d "=" -f 2)
 }

@@ -11,10 +11,10 @@ function mysql.loadDSN()
     export _mysqlDSNDatabase="${DSN[3]}"
 }
 
-mysql.load()
+function mysql.load()
 {
     local destination=${1}
-    local tmpfile=$(mktemp shive.XXXXXXXXXX)
+    local tmpfile=$(mktemp /tmp/shive.XXXXXXXXXX)
     local -i n=0
     while read; do
         echo -e $REPLY >> $tmpfile
@@ -31,7 +31,7 @@ mysql.load()
     rm -rf $tmpfile
 }
 
-mysql.query()
+function mysql.query()
 {
     local query=${1}
     echo $query | mysql\
