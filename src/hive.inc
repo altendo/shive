@@ -6,8 +6,13 @@
 # Uses kind of an intense and confusing hack to separate stdout and stderr
 function hive.query()
 {
+    local priority=${ShiveHiveQueryPriority:-NORMAL};
+    if [[ "${1}" = '-p' ]]; then
+        shift;
+        local priority=${1}; shift;
+    fi
     local args="${@}"
-    __msg info "hive args: ${args}"
+    __msg info "hive priority: ${priority}, args: ${args}"
     # inside subshell: swap hive's stdout (results) and stderr (messages)
     # so verifyOutput can read hive messages (reads stdout, outputs stderr);
     # redirect pipe messages to stdout so hive results and hive messages are separate
@@ -15,6 +20,8 @@ function hive.query()
     {
         hive\
             -hiveconf hive.root.logger=ERROR,console\
+            -hiveconf mapred.job.priority=${priority:-NORMAL}\
+            -hiveconf projectDir=$ShiveProjectDir\
             "${@}"\
             3>&1 1>&2 2>&3\
             | hive.verifyOutput\

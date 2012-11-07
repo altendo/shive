@@ -129,6 +129,9 @@ export __LogTarget="syslog:user"
 
 ## -- bashinator message mailing settings --
 
+#export __SendmailBin=mail;
+#export __SendmailArgs='';
+
 ## enable/disable mailing of messages by severity
 export __MailDebug=0   # default: 0
 export __MailInfo=0    # default: 1

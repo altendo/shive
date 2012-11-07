@@ -77,6 +77,10 @@ function getShiveLib()
 # Bashinator functions
 function __init()
 {
+    if [[ "${1}" = '-p' ]]; then
+        shift;
+        export ShiveHiveQueryPriority=${1}; shift;
+    fi
     return 0;
 }
 
@@ -84,6 +88,6 @@ function __main()
 {
     # SOME HACKISH SHIT RIGHT HERE
     export include
-    source $ShiveCallFile
+    source $ShiveCallFile "${@}"
     return 0;
 }
