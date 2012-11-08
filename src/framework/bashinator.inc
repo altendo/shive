@@ -946,7 +946,6 @@ function __msgMail() {
     local -i i=0
     IFS=$'\n'
     for messageLine in $(cat ${__MsgArrayFile}); do
-        __msg debug "cat msg: ${messageLine}"
         IFS='|' read -ra column <<< "${messageLine}";
         unset IFS
         local timestamp="${column[0]}"; unset column[0];

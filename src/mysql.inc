@@ -59,6 +59,6 @@ function mysql.query()
         -h "${_mysqlDSNHost}"\
         -D "${_mysqlDSNDatabase}"\
         -u "${_mysqlDSNUser}"\
-        --password="${_mysqlDSNPass}"
-    return 0;
+        --password="${_mysqlDSNPass}";
+    return ${PIPESTATUS[1]};
 }
