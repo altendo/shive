@@ -81,6 +81,10 @@ function __init()
         shift;
         export ShiveHiveQueryPriority=${1}; shift;
     fi
+    if [[ "${1}" = '-q' ]]; then
+        shift;
+        export __MsgQuiet=1;
+    fi
     return 0;
 }
 

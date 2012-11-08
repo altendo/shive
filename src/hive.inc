@@ -27,7 +27,14 @@ function hive.query()
             | hive.verifyOutput\
             2>&1
     } 3>&1 1>&2 2>&3
-    return ${PIPESTATUS[1]};
+
+    if [[ "${PIPESTATUS[1]}" = '0' ]]; then
+        __msg info "Hive query executed successfully."
+        return 0;
+    else
+        __msg err "Error executing hive query."
+        return ${PIPESTATUS[1]};
+    fi
 }
 
 ##

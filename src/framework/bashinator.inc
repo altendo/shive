@@ -237,7 +237,7 @@ function __cleanup() {
     ## remove script subcommand logfile
     if [[ ${__ScriptSubCommandLog:-0} == 1 && "${__ScriptSubCommandLogFile}" != /dev/null ]]; then
         __msg debug "removing script subcommand logfile '${__ScriptSubCommandLogFile}'"
-        if ! rm -f "${__ScriptSubCommandLogFile}" &>/dev/null; then
+         if ! rm -f "${__ScriptSubCommandLogFile}" &>/dev/null; then
             __msg alert "failed to remove script subcommand logfile '${__ScriptSubCommandLogFile}'"
             return 2 # error
         else
@@ -661,6 +661,12 @@ function __msgLog() {
     unset IFS
     local -i l=0
     for ((l = 0; l < ${#logTargetArray[@]}; l++)); do
+
+        # this didn't seem to be working earlier???
+        if [[ -e $_L ]]; then
+            echo "${fileTargetMessagePrefix}${message}" >> ${_L:-/dev/null/}
+        fi
+
         local logTarget=${logTargetArray[l]}
         case ${logTarget} in
             ## log to a file
@@ -678,18 +684,18 @@ function __msgLog() {
                 if [[ -z ${message} ]]; then
                     if [[ ${logMode} == 'append' || ${__LogFileHasBeenWrittenTo} -eq 1 ]]; then
                         ## TODO FIXME: check return value?
-                        sed -e "s/^/${fileTargetMessagePrefix}/" >>${logFile} 2>>"${_L:-/dev/null}"
+                        sed -e "s/^/${fileTargetMessagePrefix}/" >>${logFile} # 2>>"${_L:-/dev/null}"
                     else
                         ## TODO FIXME: check return value?
-                        sed -e "s/^/${fileTargetMessagePrefix}/" >${logFile} 2>>"${_L:-/dev/null}"
+                        sed -e "s/^/${fileTargetMessagePrefix}/" >${logFile} # 2>>"${_L:-/dev/null}"
                     fi
                 else
                     if [[ ${logMode} == 'append' || ${__LogFileHasBeenWrittenTo} -eq 1 ]]; then
                         ## TODO FIXME: check return value?
-                        echo "${fileTargetMessagePrefix}${message}" >>${logFile} 2>>"${_L:-/dev/null}"
+                        echo "${fileTargetMessagePrefix}${message}" >>${logFile} # 2>>"${_L:-/dev/null}"
                     else
                         ## TODO FIXME: check return value?
-                        echo "${fileTargetMessagePrefix}${message}" >${logFile} 2>>"${_L:-/dev/null}"
+                        echo "${fileTargetMessagePrefix}${message}" >${logFile} # 2>>"${_L:-/dev/null}"
                     fi
                 fi
                 ## global helper variable to determine if logfile
@@ -711,10 +717,10 @@ function __msgLog() {
                 ## send log message to syslog
                 if [[ -z ${message} ]]; then
                     ## log stdin
-                    logger -p "${syslogPri}" -t "${syslogTag}" >>"${_L:-/dev/null}" 2>&1
+                    logger -p "${syslogPri}" -t "${syslogTag}" # >>"${_L:-/dev/null}" 2>&1
                 else
                     ## log passed message
-                    logger -p "${syslogPri}" -t "${syslogTag}" -- "${syslogTargetMessagePrefix}${message}" >>"${_L:-/dev/null}" 2>&1
+                    logger -p "${syslogPri}" -t "${syslogTag}" -- "${syslogTargetMessagePrefix}${message}" # >>"${_L:-/dev/null}" 2>&1
                 fi
                 ;;
             ## any other (invalid) log target
@@ -914,6 +920,10 @@ function __msgMail() {
     local mailSubject=${__MailSubject:-Messages from ${__ScriptFile} running on ${__ScriptHost}}
 
     ## ----- main -----
+
+    if [[ ${__MsgQuiet} -eq 1 ]]; then
+        return 0
+    fi
 
     ## check whether the global message array contains any messages at all
     if [[ ${#__MsgArray[@]} -eq 0 ]]; then
