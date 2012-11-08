@@ -211,6 +211,9 @@ function __prepare() {
         fi
     fi
 
+    # create MsgArrayFile, since keeping messages in memory is iffy
+    export __MsgArrayFile=$(mktemp -t -p "/tmp" shive.msglog.${__ScriptName}.XXXXXXXXXX)
+
     return 0 # success
 
 } # __prepare()
@@ -868,6 +871,9 @@ function __msg() {
         ## append current message to the global message array
         __MsgArray+=( "${timestamp}|${severity}|${source}|${currentMessage}" )
 
+        ## issue with logging, make 'global message array' a logfile.
+        echo -e "${timestamp}|${severity}|${source}|${currentMessage}" >> ${__MsgArrayFile:-/dev/null}
+
         ## only print current message if quiet operation isn't enabled
         if [[ ${quiet} -ne 1 ]]; then
             __msgPrint "${timestamp}" "${severity}" "${source}" "${currentMessage}"
@@ -929,21 +935,25 @@ function __msgMail() {
     if [[ ${#__MsgArray[@]} -eq 0 ]]; then
         return 0
     fi
+    if [[ ! -e ${__MsgArrayFile} ]]; then
+        return 0;
+    fi
 
     ## initialize mail message array
     local -a mailMessageArray=()
 
     ## loop through global message array
     local -i i=0
-    for ((i = 0; i < ${#__MsgArray[@]}; i++)); do
-        IFS='|'
-        set -- ${__MsgArray[i]}
+    IFS=$'\n'
+    for messageLine in $(cat ${__MsgArrayFile}); do
+        __msg debug "cat msg: ${messageLine}"
+        IFS='|' read -ra column <<< "${messageLine}";
         unset IFS
-        local timestamp=${1}; shift
-        local severity=${1}; shift
-        local source=${1}; shift
-        local message=${@}
-        set --
+        local timestamp="${column[0]}"; unset column[0];
+        local severity="${column[1]}"; unset column[1];
+        local source="${column[2]}"; unset column[2];
+        local message="${column[@]}"
+        IFS=$'\n'
 
         ## check whether message is to be mailed at all
         case ${severity} in
@@ -1001,6 +1011,9 @@ function __msgMail() {
         mailMessageArray+=( "${messagePrefix}${message}" )
     done
 
+    # delete MsgArrayFile
+    rm -rf $__MsgArrayFile
+
     ## check whether the mail message array contains any messages at all
     if [[ ${#mailMessageArray[@]} -eq 0 ]]; then
         return 0
@@ -1013,15 +1026,15 @@ function __msgMail() {
             echo "${mailMessageArray[i]}"
         done
         ## append script subcommand log?
-        if [[ ${__MailAppendScriptSubCommandLog:-1} -eq 1 \
-            && ${__ScriptSubCommandLog:-0} -eq 1 \
-            && ${__ScriptSubCommandLogFile} != /dev/null \
-            && -s ${__ScriptSubCommandLogFile} ]]; then
-            echo
-            echo "--8<--[ start of script subcommand log (${__ScriptSubCommandLogFile}) ]--8<--"
-            cat "${__ScriptSubCommandLogFile}" 2>/dev/null
-            echo "--8<--[ end of script subcommand log ]--8<--"
-        fi
+        # if [[ ${__MailAppendScriptSubCommandLog:-1} -eq 1 \
+        #     && ${__ScriptSubCommandLog:-0} -eq 1 \
+        #     && ${__ScriptSubCommandLogFile} != /dev/null \
+        #     && -s ${__ScriptSubCommandLogFile} ]]; then
+        #     echo
+        #     echo "--8<--[ start of script subcommand log (${__ScriptSubCommandLogFile}) ]--8<--"
+        #     cat "${__ScriptSubCommandLogFile}" 2>/dev/null
+        #     echo "--8<--[ end of script subcommand log ]--8<--"
+        # fi
     } | __mail \
         "${mailFrom}" \
         "${mailEnvelopeFrom}" \
