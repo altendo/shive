@@ -1,9 +1,29 @@
-Shive: Shell HIVE framework
+Shive: Shell Hive framework
 ======
 
-Shive is a Hadoop/HIVE library framework built on [Bashinator](http://www.bashinator.org/) to bring organization, standardized logging, mailing and stack tracing to HIVE projects.  The goal of shive is to write light-weight HIVE jobs with as little boilerplate as possible.  Currently, shive includes utility functions to query HIVE and MySQL.  See examples directory to use shive in a project.
+Shive is a BASH library that aims to help organize and provide logging for Hadoop Hive project.  Shive is written in BASH with [Bashinator](http://bashinator.org/), a framework that adds organization, console and mail logging and stack tracing to BASH projects.
 
-Shive *must* be executed with BASH.  To initialize and run a shive script, be sure to chmod and execute:
+I wrote Shive because organizing Hive projects is not straight-forward, and neither is setting up logging.  I wanted custom error reports e-mailed to me so I could leave my computer and come back when my jobs finished.  I wanted to import results into MySQL, too.  And a library import system to  write both a standard library and a local library.  And as little boilerplate as possible.  (And I secretly wanted to learn BASH.  This is a decision I later regretted.)
+
+Shive can be treated as a standard library for Hive-specific BASH functions.  In your project directory, you should include a bootstrap script that points to Shive.  Any local library files should be included in a project-specific /lib folder.
+
+A typical shive project is organized:
+
+    .
+    |-- shivelib/
+    |-- project1/
+        |-- bin/
+        |-- lib/
+        |-- sql/
+        |-- bootstrap.sh
+    |-- project2/
+        |-- bin/
+        |-- lib/
+        |-- sql/
+        |-- bootstrap.sh
+
+
+BASH  is required to run shive.  Make scripts executable and run.
 
     chmod +x project/bin/script.sh
     ./project/bin/script.sh

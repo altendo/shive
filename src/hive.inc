@@ -12,7 +12,7 @@ function hive.query()
         local priority=${1}; shift;
     fi
     local args="${@}"
-    __msg info "hive priority: ${priority}, args: ${args}"
+    __msg debug "priority=${priority} ${args}"
     # inside subshell: swap hive's stdout (results) and stderr (messages)
     # so verifyOutput can read hive messages (reads stdout, outputs stderr);
     # redirect pipe messages to stdout so hive results and hive messages are separate
@@ -29,7 +29,7 @@ function hive.query()
     } 3>&1 1>&2 2>&3
 
     if [[ "${PIPESTATUS[1]}" = '0' ]]; then
-        __msg info "Hive query executed successfully."
+        __msg debug "Hive query executed successfully."
         return 0;
     else
         __msg err "Error executing hive query."
@@ -53,7 +53,7 @@ function hive.verifyOutput()
         elif [[ ! -z `echo $message | grep -iE "error"` ]]; then
             __msg debug "${message}"
         elif [[ ! -z `echo $message | grep -iE "rows loaded|time taken|ok|loading data"` ]]; then
-            __msg info "${message}"
+            __msg debug "${message}"
         else
             __msg debug "${message}"
         fi
@@ -63,4 +63,39 @@ function hive.verifyOutput()
     else
         return 0;
     fi
+}
+
+##
+# dump hive query to csv
+# @echo tmpfile
+function hive.queryToCSV()
+{
+    local tmpfile=$(mktemp /tmp/shive.XXXXXXXXXXX);
+    hive.query "$@" | {
+        while read; do
+            echo -e $REPLY >> $tmpfile;
+        done;
+    }
+
+    # note: echo $REPLY converts HIVE \t to whitespace. need to reconvert to tabs.
+    sed -i 's/\s/\t/g' $tmpfile;
+
+    echo $tmpfile;
+}
+
+function hive.tableModified()
+{
+    local table=${1};
+    local stat=$(hadoop fs -stat "/user/${USER}/${table}" 2>/dev/null);
+    local ret=${?};
+    echo $stat;
+    return $ret;
+}
+
+function hive.isTableFresh()
+{
+    local checkTS=$(date +%s --date="${1}");
+    local table=${2};
+    local tableModified=$(date +%s --date="$(hive.tableModified $table)");
+    return $(( !( $tableModified - $checkTS > 0 ) ));
 }

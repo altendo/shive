@@ -14,6 +14,12 @@ function getApplicationPath()
     fi
     ShiveInitialized=true;
 
+    ## Determine running correct shell environment
+    if [ -z $(echo $BASH | grep -iE "bash") ]; then
+        echo "!!! FATAL: bash 4.x (/bin/bash) required to use shive.";
+        exit 2;
+    fi
+
     ## Initialize Bashinator application variables
     export __ScriptFile=${0##*/} # thisscript.sh
     export __ScriptName=${__ScriptFile%.sh} # thisscript
@@ -39,11 +45,10 @@ function getApplicationPath()
     fi
 
     ## Project variables
-    export ShiveProjectDir=$(readlink -f $(dirname $(readlink -f $__ScriptFile))/$__ScriptPath/..)
-    export ShiveLocalBin=$ShiveProjectDir/bin
+    export ShiveProjectDir=$(dirname $(readlink -f $(caller 0 | cut -d ' ' -f 3)));
+    export ShiveCallFile=$(readlink -f $__ScriptPath/$__ScriptFile);
     export ShiveLocalLib=$ShiveProjectDir/lib
     export ShiveLocalSql=$ShiveProjectDir/sql
-    export ShiveCallFile=$ShiveLocalBin/$__ScriptFile
 
     ## Initialize Bashinator framework
     __boot

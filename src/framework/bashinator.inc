@@ -150,7 +150,7 @@ function __dispatch() {
     __prepare || __die 2 "__prepare() failure"
 
     ## main application function
-    __main || __die ${?} "__main() failure"
+    __main "${@}" || __die ${?} "__main() failure"
 
     ## main application post-processing (remove lockfile and subcommand logfile)
     __cleanup || __die 2 "__cleanup() failure"
@@ -923,7 +923,6 @@ function __msgMail() {
     local mailFrom=${__MailFrom:-${USER} <${USER}@${__ScriptHost}>}
     local mailEnvelopeFrom=${__MailEnvelopeFrom:-${USER}@${__ScriptHost}}
     local mailRecipient=${__MailRecipient:-${USER}@${__ScriptHost}}
-    local mailSubject=${__MailSubject:-Messages from ${__ScriptFile} running on ${__ScriptHost}}
 
     ## ----- main -----
 
@@ -938,6 +937,9 @@ function __msgMail() {
     if [[ ! -e ${__MsgArrayFile} ]]; then
         return 0;
     fi
+
+    ## initialize message type (error/success)
+    local -i errorMessage=0;
 
     ## initialize mail message array
     local -a mailMessageArray=()
@@ -964,6 +966,11 @@ function __msgMail() {
                crit|2) if [[ ${__MailCrit:-1}    -ne 1 ]]; then continue; fi ;;
               alert|1) if [[ ${__MailAlert:-1}   -ne 1 ]]; then continue; fi ;;
               emerg|0) if [[ ${__MailEmerg:-1}   -ne 1 ]]; then continue; fi ;;
+        esac
+
+        ## check whether message is an error
+        case ${severity} in
+            emerg|0|alert|1|crit|2|err|3) errorMessage=1;
         esac
 
         ## mapping severity -> severityPrefix
@@ -1016,6 +1023,13 @@ function __msgMail() {
     ## check whether the mail message array contains any messages at all
     if [[ ${#mailMessageArray[@]} -eq 0 ]]; then
         return 0
+    fi
+
+    # build message subject
+    if [ "$errorMessage" = "1" ]; then
+        local mailSubject="[ERROR] Messages from ${__ScriptFile} running on ${__ScriptHost}";
+    else
+        local mailSubject="[SUCCESS] Messages from ${__ScriptFile} running on ${__ScriptHost}";
     fi
 
     ## send mail

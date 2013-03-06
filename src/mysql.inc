@@ -45,17 +45,23 @@ function mysql.load()
         TRUNCATE TABLE ${destination};
         LOAD DATA LOCAL INFILE '${tmpfile}' REPLACE INTO TABLE ${destination}
         FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n';
-        ";
+        " || __msg err;
+    local ret=${PIPESTATUS[0]};
 
-    rm -rf $tmpfile
-    __msg info "Loaded ${n} rows to ${destination}."
-    return 0;
+    rm -rf $tmpfile;
+    if [ "$ret" = "0" ]; then
+        __msg debug "Loaded ${n} rows to ${destination}."
+        return 0;
+    else
+        return $ret;
+    fi
 }
 
 function mysql.query()
 {
-    local query=${1}
+    local query="${1}";
     echo $query | mysql\
+        --skip-column-names\
         -h "${_mysqlDSNHost}"\
         -D "${_mysqlDSNDatabase}"\
         -u "${_mysqlDSNUser}"\
