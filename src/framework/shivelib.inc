@@ -11,19 +11,29 @@ function include()
     local ShiveTestExistence='if [ "$'$ShiveTestVar'" ]; then ShiveSourceExists=true; else ShiveSourceExists=false; '$ShiveTestVar'=1; fi';
     eval $ShiveTestExistence
 
+    local includeSuccess=0;
     if [ "$ShiveSourceExists" = false ]; then
         if [ -e "$ShiveLocalLib/$ShiveInc" ]; then
             __msg debug "Attempting to open $ShiveLocalLib/$ShiveInc."
-            source "$ShiveLocalLib/$ShiveInc"
+            if source "$ShiveLocalLib/$ShiveInc"; then
+                includeSuccess=1;
+            fi
         elif [ -e "$ShiveLocalLib/$ShiveIncAlt" ]; then
             __msg debug "Attempting to open $ShiveLocalLib/$ShiveIncAlt."
-            source "$ShiveLocalLib/$ShiveIncAlt"
-        else
+            if source "$ShiveLocalLib/$ShiveIncAlt"; then
+                includeSuccess=1;
+            fi
+        elif [ -e "$ApplicationPath/$ShiveInc" ]; then
             __msg debug "Attempting to open $ApplicationPath/$ShiveInc."
-            source "$ApplicationPath/$ShiveInc"
+            if source "$ApplicationPath/$ShiveInc"; then
+                includeSuccess=1;
+            fi
+        else
+            __die err "$ShiveClassname library could not be found; exiting.";
         fi
         #    3>&1 1>&2 2>&3 | __msg err
     fi
+    return $includeSuccess;
 }
 
 # Bashinator functions
