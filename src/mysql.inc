@@ -3,6 +3,10 @@
 
 function mysql.loadDSN()
 {
+    if [[ -z "${1}" || "${1}" == ""]]; then
+        __msg err "MySQL DSN not set.";
+        return 2;
+    fi
     local dsn=${1};
     IFS=':' read -ra DSN <<< "$dsn";
     export _mysqlDSNUser="${DSN[0]}";
@@ -42,7 +46,6 @@ function mysql.load()
     # note: echo $REPLY converts HIVE \t to whitespace. need to reconvert to tabs.
     sed -i 's/\s/\t/g' $tmpfile
     mysql.query "
-        TRUNCATE TABLE ${destination};
         LOAD DATA LOCAL INFILE '${tmpfile}' REPLACE INTO TABLE ${destination}
         FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n';
         " || __msg err;
@@ -50,11 +53,18 @@ function mysql.load()
 
     rm -rf $tmpfile;
     if [ "$ret" = "0" ]; then
-        __msg debug "Loaded ${n} rows to ${destination}."
+        __msg info "Loaded ${n} rows to ${destination}."
         return 0;
     else
         return $ret;
     fi
+}
+
+function mysql.truncate()
+{
+    local table=${1};
+    mysql.query "truncate ${table}" || return 2;
+    return 0;
 }
 
 function mysql.query()
@@ -66,5 +76,6 @@ function mysql.query()
         -D "${_mysqlDSNDatabase}"\
         -u "${_mysqlDSNUser}"\
         --password="${_mysqlDSNPass}";
+    return $?;
     return ${PIPESTATUS[1]};
 }

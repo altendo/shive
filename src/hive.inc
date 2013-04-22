@@ -12,7 +12,7 @@ function hive.query()
         local priority=${1}; shift;
     fi
     local args="${@}"
-    __msg debug "priority=${priority} ${args}"
+    __msg info "hive -priority=${priority} ${args}"
     # inside subshell: swap hive's stdout (results) and stderr (messages)
     # so verifyOutput can read hive messages (reads stdout, outputs stderr);
     # redirect pipe messages to stdout so hive results and hive messages are separate
@@ -53,7 +53,7 @@ function hive.verifyOutput()
         elif [[ ! -z `echo $message | grep -iE "error"` ]]; then
             __msg debug "${message}"
         elif [[ ! -z `echo $message | grep -iE "rows loaded|time taken|ok|loading data"` ]]; then
-            __msg debug "${message}"
+            __msg info "${message}"
         else
             __msg debug "${message}"
         fi

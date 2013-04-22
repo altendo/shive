@@ -15,10 +15,10 @@ function getApplicationPath()
     ShiveInitialized=true;
 
     ## Determine running correct shell environment
-    if [ -z $(echo $BASH | grep -iE "bash") ]; then
-        echo "!!! FATAL: bash 4.x (/bin/bash) required to use shive.";
-        exit 2;
-    fi
+    #if [ -z $(echo $BASH | grep -iE "bash") ]; then
+    #    echo "!!! FATAL: bash 4.x (/bin/bash) required to use shive.";
+    #    exit 2;
+    #fi
 
     ## Initialize Bashinator application variables
     export __ScriptFile=${0##*/} # thisscript.sh
