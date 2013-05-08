@@ -1,19 +1,39 @@
 #!/bin/bash
 # mysql library
 
-function mysql.loadDSN()
+function mysql.useDSN()
 {
-    if [[ -z "${1}" || "${1}" == ""]]; then
-        __msg err "MySQL DSN not set.";
+    if [[ -z $dsnConfigs ]]; then
+        __msg err "MySQL DSNs config path not defined.";
         return 2;
     fi
-    local dsn=${1};
-    IFS=':' read -ra DSN <<< "$dsn";
-    export _mysqlDSNUser="${DSN[0]}";
-    export _mysqlDSNPass="${DSN[1]}";
-    export _mysqlDSNHost="${DSN[2]}";
-    export _mysqlDSNDatabase="${DSN[3]}";
+    local dsn=$1;
+    if [[ -z $dsn ]]; then
+        __msg err "DSN not defined.  Please supply a DSN";
+        return 2;
+    fi
+    export _mysqlDSNUser=$(cat $dsnConfigs | jq -r ".${dsn} | .user");
+    export _mysqlDSNPass=$(cat $dsnConfigs | jq -r ".${dsn} | .password");
+    export _mysqlDSNHost=$(cat $dsnConfigs | jq -r ".${dsn} | .host");
+    export _mysqlDSNDatabase=$(cat $dsnConfigs | jq -r ".${dsn} | .db");
     return 0;
+}
+
+function mysql.loadDSN()
+{
+    # deprecated
+    #if [[ -z "${1}" || "${1}" == "" ]]; then
+    #    __msg err "MySQL DSN not set.";
+    #   return 2;
+    #fi
+    #local dsn=${1};
+    #IFS=':' read -ra DSN <<< "$dsn";
+    #export _mysqlDSNUser="${DSN[0]}";
+    #export _mysqlDSNPass="${DSN[1]}";
+    #export _mysqlDSNHost="${DSN[2]}";
+    #export _mysqlDSNDatabase="${DSN[3]}";
+    #return 0;
+    return mysql.useDSN $1;
 }
 
 ##
