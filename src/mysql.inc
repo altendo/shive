@@ -12,10 +12,10 @@ function mysql.useDSN()
         __msg err "DSN not defined.  Please supply a DSN";
         return 2;
     fi
-    export _mysqlDSNUser=$(cat $dsnConfigs | jq -r ".${dsn} | .user");
-    export _mysqlDSNPass=$(cat $dsnConfigs | jq -r ".${dsn} | .password");
-    export _mysqlDSNHost=$(cat $dsnConfigs | jq -r ".${dsn} | .host");
-    export _mysqlDSNDatabase=$(cat $dsnConfigs | jq -r ".${dsn} | .db");
+    export _mysqlDSNUser=$(cat $dsnConfigs | $ApplicationPath/jq -r ".${dsn} | .user");
+    export _mysqlDSNPass=$(cat $dsnConfigs | $ApplicationPath/jq -r ".${dsn} | .password");
+    export _mysqlDSNHost=$(cat $dsnConfigs | $ApplicationPath/jq -r ".${dsn} | .host");
+    export _mysqlDSNDatabase=$(cat $dsnConfigs | $ApplicationPath/jq -r ".${dsn} | .db");
     return 0;
 }
 
@@ -33,7 +33,8 @@ function mysql.loadDSN()
     #export _mysqlDSNHost="${DSN[2]}";
     #export _mysqlDSNDatabase="${DSN[3]}";
     #return 0;
-    return mysql.useDSN $1;
+    mysql.useDSN $1;
+    return $?;
 }
 
 ##
@@ -90,12 +91,30 @@ function mysql.truncate()
 function mysql.query()
 {
     local query="${1}";
-    echo $query | mysql\
-        --skip-column-names\
-        -h "${_mysqlDSNHost}"\
-        -D "${_mysqlDSNDatabase}"\
-        -u "${_mysqlDSNUser}"\
-        --password="${_mysqlDSNPass}";
+    {
+        echo "$query" | mysql\
+            --skip-column-names\
+            -h "${_mysqlDSNHost}"\
+            -D "${_mysqlDSNDatabase}"\
+            -u "${_mysqlDSNUser}"\
+            --password="${_mysqlDSNPass}"\
+            3>&1 1>&2 2>&3\
+            | mysql.verifyOutput\
+            2>&1
+    } 3>&1 1>&2 2>&3
     return $?;
-    return ${PIPESTATUS[1]};
+}
+
+function mysql.verifyOutput()
+{
+    local -i trippedError=0;
+    local message=$@;
+    while read; do
+        local message="${REPLY}"
+        if [[ ! -z $(echo $message | grep -iE "ERROR") ]]; then
+            __msg err "${message}";
+            trippedError=2;
+        fi
+    done
+    return $trippedError;
 }
